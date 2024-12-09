@@ -6,8 +6,7 @@ st.write(
 )
 
 
-# Install necessary libraries
-!pip install pandas requests streamlit
+
 
 # Import libraries
 import pandas as pd
