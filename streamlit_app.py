@@ -72,8 +72,7 @@ if nonfarm_data and unemployment_data and hourly_earnings_data and labor_force_d
 else:
     print("Failed to fetch data.")
 
-import streamlit as st
-import plotly.express as px
+
 
 def load_data():
     return pd.read_csv("dashboard_data.csv", index_col=0)
