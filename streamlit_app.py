@@ -6,11 +6,13 @@ st.write(
 )
 
 
+# Install necessary libraries
+!pip install pandas requests streamlit
+
 # Import libraries
 import pandas as pd
 import requests
 import os
-import plotly.express as px
 
 # Function to fetch data from BLS API without a key
 def fetch_bls_data(series_id, start_year, end_year):
@@ -33,9 +35,9 @@ def process_bls_data(data):
     df = pd.DataFrame(data)
     df["value"] = pd.to_numeric(df["value"], errors="coerce")
     df["year"] = pd.to_numeric(df["year"], errors="coerce")
-    df["period"] = df["periodName"] + " " + df["year"].astype(str)
-    df = df.sort_values(by=["year", "period"])
-    df.set_index("period", inplace=True)
+    df["date"] = pd.to_datetime(df["year"].astype(str) + "-" + df["period"].str[1:], errors="coerce", format="%Y-%m") 
+    df = df.sort_values(by="date")  
+    df.set_index("date", inplace=True)
     return df[["value"]]
 
 # Example: Fetch Non-Farm Payrolls, Unemployment Rates, Average Hourly Earnings, and Civilian Labor Force
@@ -73,7 +75,8 @@ if nonfarm_data and unemployment_data and hourly_earnings_data and labor_force_d
 else:
     print("Failed to fetch data.")
 
-
+import streamlit as st
+import plotly.express as px
 
 def load_data():
     return pd.read_csv("dashboard_data.csv", index_col=0)
@@ -104,3 +107,5 @@ st.plotly_chart(fig3)
 st.subheader("Civilian Labor Force")
 fig4 = px.line(data, y="Civilian Labor Force", title="Civilian Labor Force")
 st.plotly_chart(fig4)
+
+
