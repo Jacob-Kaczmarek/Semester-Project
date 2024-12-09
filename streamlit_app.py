@@ -10,6 +10,7 @@ st.write(
 import pandas as pd
 import requests
 import os
+import plotly.express as px
 
 # Function to fetch data from BLS API without a key
 def fetch_bls_data(series_id, start_year, end_year):
