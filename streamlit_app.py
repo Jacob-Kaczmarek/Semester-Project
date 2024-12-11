@@ -1,3 +1,5 @@
+# Install necessary libraries
+!pip install pandas requests streamlit plotly
 
 import pandas as pd
 import requests
@@ -77,7 +79,7 @@ combined_data = combined_data.sort_index()
 
 # Streamlit App
 # Dashboard Title
-st.title("📊 Labor Statistics Dashboard")
+st.title("Labor Statistics Dashboard")
 st.write("An interactive dashboard visualizing key U.S. labor statistics from 2022 to 2023.")
 
 if not combined_data.empty:
@@ -86,7 +88,7 @@ if not combined_data.empty:
     fig1 = px.line(
         combined_data,
         y="Non-Farm Payrolls",
-        title="📈 Non-Farm Payrolls",
+        title="Non-Farm Payrolls",
         labels={"date": "Date", "Non-Farm Payrolls": "Employment (in Thousands)"},
         template="plotly_white",
     )
@@ -99,7 +101,7 @@ if not combined_data.empty:
     fig2 = px.line(
         combined_data,
         y="Unemployment Rate",
-        title="📉 Unemployment Rate",
+        title="Unemployment Rate",
         labels={"date": "Date", "Unemployment Rate": "Rate (%)"},
         template="plotly_white",
     )
@@ -112,7 +114,7 @@ if not combined_data.empty:
     fig3 = px.line(
         combined_data,
         y="Total Private Avg Hourly Earnings",
-        title="💵 Average Hourly Earnings",
+        title="Average Hourly Earnings",
         labels={"date": "Date", "Total Private Avg Hourly Earnings": "Earnings ($)"},
         template="plotly_white",
     )
@@ -125,12 +127,27 @@ if not combined_data.empty:
     fig4 = px.line(
         combined_data,
         y="Civilian Labor Force",
-        title="👥 Civilian Labor Force",
+        title="Civilian Labor Force",
         labels={"date": "Date", "Civilian Labor Force": "Labor Force (in Thousands)"},
         template="plotly_white",
     )
     fig4.update_traces(line=dict(color="orange", width=3), hoverinfo="y+x")
     fig4.update_layout(showlegend=False)
     st.plotly_chart(fig4, use_container_width=True)
+
+    # Scatter Plot: Unemployment Rate vs. Civilian Labor Force
+    st.subheader("Unemployment Rate vs. Civilian Labor Force")
+    fig_scatter = px.scatter(
+        combined_data,
+        x="Unemployment Rate",
+        y="Civilian Labor Force",
+        title="Unemployment Rate vs. Civilian Labor Force",
+        labels={
+            "Unemployment Rate": "Rate (%)",
+            "Civilian Labor Force": "Labor Force (in Thousands)"
+        },
+        template="plotly_white",
+    )
+    st.plotly_chart(fig_scatter, use_container_width=True)
 else:
     st.error("No data available to display.")
