@@ -1,5 +1,3 @@
-# Install necessary libraries
-!pip install pandas requests streamlit plotly
 
 import pandas as pd
 import requests
