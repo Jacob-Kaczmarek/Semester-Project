@@ -1,16 +1,9 @@
-import streamlit as st
+# Install necessary libraries
+!pip install pandas requests streamlit plotly
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
-
-
-
-
-import streamlit as st
 import pandas as pd
 import requests
+import streamlit as st
 import os
 import plotly.express as px
 
@@ -86,28 +79,60 @@ combined_data = combined_data.sort_index()
 
 # Streamlit App
 # Dashboard Title
-st.title("Labor Statistics Dashboard")
-st.write("Interactive dashboard with labor statistics data.")
+st.title("📊 Labor Statistics Dashboard")
+st.write("An interactive dashboard visualizing key U.S. labor statistics from 2022 to 2023.")
 
 if not combined_data.empty:
-
-
-    # Plot data
+    # Plot Non-Farm Payrolls
     st.subheader("Non-Farm Payrolls Over Time")
-    fig1 = px.line(combined_data, y="Non-Farm Payrolls", title="Non-Farm Payrolls")
-    st.plotly_chart(fig1)
+    fig1 = px.line(
+        combined_data,
+        y="Non-Farm Payrolls",
+        title="📈 Non-Farm Payrolls",
+        labels={"date": "Date", "Non-Farm Payrolls": "Employment (in Thousands)"},
+        template="plotly_white",
+    )
+    fig1.update_traces(line=dict(color="blue", width=3), hoverinfo="y+x")
+    fig1.update_layout(showlegend=False)
+    st.plotly_chart(fig1, use_container_width=True)
 
+    # Plot Unemployment Rate
     st.subheader("Unemployment Rate Over Time")
-    fig2 = px.line(combined_data, y="Unemployment Rate", title="Unemployment Rate")
-    st.plotly_chart(fig2)
+    fig2 = px.line(
+        combined_data,
+        y="Unemployment Rate",
+        title="📉 Unemployment Rate",
+        labels={"date": "Date", "Unemployment Rate": "Rate (%)"},
+        template="plotly_white",
+    )
+    fig2.update_traces(line=dict(color="green", width=3), hoverinfo="y+x")
+    fig2.update_layout(showlegend=False)
+    st.plotly_chart(fig2, use_container_width=True)
 
+    # Plot Average Hourly Earnings
     st.subheader("Total Private Average Hourly Earnings")
-    fig3 = px.line(combined_data, y="Total Private Avg Hourly Earnings", title="Hourly Earnings")
-    st.plotly_chart(fig3)
+    fig3 = px.line(
+        combined_data,
+        y="Total Private Avg Hourly Earnings",
+        title="💵 Average Hourly Earnings",
+        labels={"date": "Date", "Total Private Avg Hourly Earnings": "Earnings ($)"},
+        template="plotly_white",
+    )
+    fig3.update_traces(line=dict(color="purple", width=3), hoverinfo="y+x")
+    fig3.update_layout(showlegend=False)
+    st.plotly_chart(fig3, use_container_width=True)
 
-    st.subheader("Civilian Labor Force")
-    fig4 = px.line(combined_data, y="Civilian Labor Force", title="Civilian Labor Force")
-    st.plotly_chart(fig4)
+    # Plot Civilian Labor Force
+    st.subheader("Civilian Labor Force Over Time")
+    fig4 = px.line(
+        combined_data,
+        y="Civilian Labor Force",
+        title="👥 Civilian Labor Force",
+        labels={"date": "Date", "Civilian Labor Force": "Labor Force (in Thousands)"},
+        template="plotly_white",
+    )
+    fig4.update_traces(line=dict(color="orange", width=3), hoverinfo="y+x")
+    fig4.update_layout(showlegend=False)
+    st.plotly_chart(fig4, use_container_width=True)
 else:
     st.error("No data available to display.")
-
