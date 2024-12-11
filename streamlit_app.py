@@ -90,9 +90,7 @@ st.title("Labor Statistics Dashboard")
 st.write("Interactive dashboard with labor statistics data.")
 
 if not combined_data.empty:
-    # Display data
-    st.subheader("Data Table")
-    st.dataframe(combined_data)
+
 
     # Plot data
     st.subheader("Non-Farm Payrolls Over Time")
