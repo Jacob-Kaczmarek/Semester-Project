@@ -8,11 +8,10 @@ st.write(
 
 
 
-# Import libraries
+import streamlit as st
 import pandas as pd
 import requests
 import os
-import streamlit as st
 import plotly.express as px
 
 # Define the CSV file name
@@ -34,12 +33,14 @@ def fetch_bls_data(series_id, start_year, end_year):
         print(f"Error: {response.status_code}, {response.text}")
         return []
 
-# Process fetched data
+# Function to process fetched BLS data
 def process_bls_data(data):
     df = pd.DataFrame(data)
     df["value"] = pd.to_numeric(df["value"], errors="coerce")
     df["year"] = pd.to_numeric(df["year"], errors="coerce")
-    df["date"] = pd.to_datetime(df["year"].astype(str) + "-" + df["period"].str[1:], errors="coerce", format="%Y-%m")
+    df["date"] = pd.to_datetime(
+        df["year"].astype(str) + "-" + df["period"].str[1:], errors="coerce", format="%Y-%m"
+    )
     df = df.sort_values(by="date")
     df.set_index("date", inplace=True)
     return df[["value"]]
@@ -47,69 +48,67 @@ def process_bls_data(data):
 # Check if the CSV file exists
 if os.path.exists(csv_file):
     print("Loading data from CSV file...")
-    data = pd.read_csv(csv_file, index_col=0, parse_dates=True)
+    combined_data = pd.read_csv(csv_file, index_col=0, parse_dates=True)
 else:
     print("Fetching data from BLS API...")
 
-    # Example: Fetch Non-Farm Payrolls, Unemployment Rates, Average Hourly Earnings, and Civilian Labor Force
-    nonfarm_series = "CES0000000001"  # Total Nonfarm Employment
-    unemployment_series = "LNS14000000"  # Unemployment Rate
-    hourly_earnings_series = "CES0500000003"  # Total Private Average Hourly Earnings
-    labor_force_series = "LNS11000000"  # Civilian Labor Force (Seasonally Adjusted)
+    # Define series and date range
+    series_ids = {
+        "Non-Farm Payrolls": "CES0000000001",
+        "Unemployment Rate": "LNS14000000",
+        "Total Private Avg Hourly Earnings": "CES0500000003",
+        "Civilian Labor Force": "LNS11000000"
+    }
     start_year = "2022"
     end_year = "2023"
 
-    nonfarm_data = fetch_bls_data(nonfarm_series, start_year, end_year)
-    unemployment_data = fetch_bls_data(unemployment_series, start_year, end_year)
-    hourly_earnings_data = fetch_bls_data(hourly_earnings_series, start_year, end_year)
-    labor_force_data = fetch_bls_data(labor_force_series, start_year, end_year)
+    # Fetch and process each series
+    series_dataframes = {}
+    for series_name, series_id in series_ids.items():
+        raw_data = fetch_bls_data(series_id, start_year, end_year)
+        if raw_data:
+            series_dataframes[series_name] = process_bls_data(raw_data)
 
-    if nonfarm_data and unemployment_data and hourly_earnings_data and labor_force_data:
-        nonfarm_df = process_bls_data(nonfarm_data)
-        unemployment_df = process_bls_data(unemployment_data)
-        hourly_earnings_df = process_bls_data(hourly_earnings_data)
-        labor_force_df = process_bls_data(labor_force_data)
-
-        # Combine DataFrames
-        data = pd.concat({
-            "Non-Farm Payrolls": nonfarm_df["value"],
-            "Unemployment Rate": unemployment_df["value"],
-            "Total Private Avg Hourly Earnings": hourly_earnings_df["value"],
-            "Civilian Labor Force": labor_force_df["value"]
-        }, axis=1)
-
-        # Save Data to CSV
-        data.to_csv(csv_file)
-        print(f"Data fetched and saved to {csv_file}")
+    # Combine all series into a single DataFrame
+    if series_dataframes:
+        combined_data = pd.concat(
+            {name: df["value"] for name, df in series_dataframes.items()},
+            axis=1
+        )
+        combined_data.to_csv(csv_file)
+        print(f"Data successfully fetched and saved to {csv_file}")
     else:
-        print("Failed to fetch data.")
-        data = pd.DataFrame()  # Empty DataFrame as fallback
+        print("Failed to fetch data from API.")
+        combined_data = pd.DataFrame()  # Empty DataFrame as fallback
+
+# Ensure data is sorted and properly formatted
+combined_data = combined_data.sort_index()
 
 # Streamlit App
 # Dashboard Title
 st.title("Labor Statistics Dashboard")
 st.write("Interactive dashboard with labor statistics data.")
 
-if not data.empty:
+if not combined_data.empty:
     # Display data
     st.subheader("Data Table")
-    st.dataframe(data)
+    st.dataframe(combined_data)
 
     # Plot data
     st.subheader("Non-Farm Payrolls Over Time")
-    fig1 = px.line(data, y="Non-Farm Payrolls", title="Non-Farm Payrolls")
+    fig1 = px.line(combined_data, y="Non-Farm Payrolls", title="Non-Farm Payrolls")
     st.plotly_chart(fig1)
 
     st.subheader("Unemployment Rate Over Time")
-    fig2 = px.line(data, y="Unemployment Rate", title="Unemployment Rate")
+    fig2 = px.line(combined_data, y="Unemployment Rate", title="Unemployment Rate")
     st.plotly_chart(fig2)
 
     st.subheader("Total Private Average Hourly Earnings")
-    fig3 = px.line(data, y="Total Private Avg Hourly Earnings", title="Hourly Earnings")
+    fig3 = px.line(combined_data, y="Total Private Avg Hourly Earnings", title="Hourly Earnings")
     st.plotly_chart(fig3)
 
     st.subheader("Civilian Labor Force")
-    fig4 = px.line(data, y="Civilian Labor Force", title="Civilian Labor Force")
+    fig4 = px.line(combined_data, y="Civilian Labor Force", title="Civilian Labor Force")
     st.plotly_chart(fig4)
 else:
     st.error("No data available to display.")
