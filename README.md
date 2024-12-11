@@ -1,19 +1,3 @@
-# 🎈 Blank app template
+Welcome to my Semester Project analyzing some interesting data provided by the Bureau of Labor Statistics!
 
-A simple Streamlit app template for you to modify!
-
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
-
-### How to run it on your own machine
-
-1. Install the requirements
-
-   ```
-   $ pip install -r requirements.txt
-   ```
-
-2. Run the app
-
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+Here is the link to my Streamlit Dashboard: https://semester-project-ejmxevlpubkgslcn2fr7b6.streamlit.app/
