@@ -2,9 +2,8 @@ name: Update Labor Statistics Data
 
 on:
   schedule:
-    # Schedule to run on the 5th of every month at 12:00 AM UTC
-    - cron: "0 0 5 * *"
-  workflow_dispatch: # Allow manual triggering if needed
+    - cron: "0 0 5 * *"  # Every 5th of the month at 12:00 AM UTC
+  workflow_dispatch:  # Allow manual triggers
 
 jobs:
   update-data:
@@ -22,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install pandas requests
 
     - name: Update dataset
       run: |
@@ -32,6 +31,6 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git add data/bls_dataframe.csv
-        git commit -m "Automated data update for the new month"
+        git add bls_dataframe.csv
+        git commit -m "Replaced bls_dataframe.csv with updated data"
         git push
