@@ -21,21 +21,15 @@ series_ids = {
     "Civilian Labor Force": "LNS11000000",
 }
 current_year = datetime.now().year
-current_month = datetime.now().month
 
-def fetch_bls_data(series_id, year, month):
-    url = f"https://api.bls.gov/publicAPI/v1/timeseries/data/{series_id}?startyear={year}&endyear={year}"
+def fetch_bls_data(series_id, start_year, end_year):
+    url = f"https://api.bls.gov/publicAPI/v1/timeseries/data/{series_id}?startyear={start_year}&endyear={end_year}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
         if "Results" in data and "series" in data["Results"]:
             return data["Results"]["series"][0]["data"]
-        else:
-            print(f"Error in data format: {data}")
-            return []
-    else:
-        print(f"Error: {response.status_code}, {response.text}")
-        return []
+    return []
 
 def process_bls_data(raw_data):
     df = pd.DataFrame(raw_data)
@@ -47,24 +41,22 @@ def process_bls_data(raw_data):
     df.set_index("date", inplace=True)
     return df[["value"]]
 
-# Check if the CSV file exists
-if os.path.exists(csv_file):
-    combined_data = pd.read_csv(csv_file, index_col=0, parse_dates=True)
-else:
-    combined_data = pd.DataFrame()
-
-# Fetch and append new data
+# Fetch and process all series
+series_dataframes = {}
 for series_name, series_id in series_ids.items():
-    raw_data = fetch_bls_data(series_id, current_year, current_year)
+    raw_data = fetch_bls_data(series_id, current_year - 1, current_year)
     if raw_data:
-        series_df = process_bls_data(raw_data)
-        if series_name in combined_data.columns:
-            combined_data.update(series_df.rename(columns={"value": series_name}))
-        else:
-            combined_data = pd.concat(
-                [combined_data, series_df.rename(columns={"value": series_name})], axis=1
-            )
+        series_dataframes[series_name] = process_bls_data(raw_data)
 
-# Save updated data
+# Combine all series into a single DataFrame
+if series_dataframes:
+    combined_data = pd.concat(
+        {name: df["value"] for name, df in series_dataframes.items()},
+        axis=1
+    )
+else:
+    combined_data = pd.DataFrame()  # Create an empty DataFrame as fallback
+
+# Always overwrite the file
 combined_data.to_csv(csv_file)
-print("Data successfully updated.")
+print(f"Data successfully replaced in {csv_file}.")
