@@ -1,0 +1,37 @@
+name: Update Labor Statistics Data
+
+on:
+  schedule:
+    # Schedule to run on the 5th of every month at 12:00 AM UTC
+    - cron: "0 0 5 * *"
+  workflow_dispatch: # Allow manual triggering if needed
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Update dataset
+      run: |
+        python update_data.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add bls_dataframe.csv
+        git commit -m "Automated data update for the new month"
+        git push
